@@ -1,0 +1,255 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+
+struct TrainNode {
+    int trainNumber;
+    string trainName;
+    string departureTime;
+    string destination;
+    TrainNode* next;
+
+    
+    TrainNode(int number, const string& name, const string& time, const string& dest)
+        : trainNumber(number), trainName(name), departureTime(time), destination(dest), next(nullptr) {}
+};
+
+
+struct TrainScheduleNode {
+    string origin;
+    string destination;
+    string departureTime;
+    TrainScheduleNode* next;
+
+    TrainScheduleNode(const string& orig, const string& dest, const string& time)
+        : origin(orig), destination(dest), departureTime(time), next(nullptr) {}
+};
+
+
+struct SeatReservationNode {
+    int trainNumber;
+    int availableSeatsFirstClass;
+    int availableSeatsSecondClass;
+    SeatReservationNode* next;
+
+    SeatReservationNode(int number, int seatsFirstClass, int seatsSecondClass)
+        : trainNumber(number), availableSeatsFirstClass(seatsFirstClass), availableSeatsSecondClass(seatsSecondClass), next(nullptr) {}
+};
+
+
+class TrainManagementSystem {
+private:
+    TrainNode* head; 
+    TrainScheduleNode* scheduleHead; 
+    SeatReservationNode* seatHead; 
+
+public:
+    
+    TrainManagementSystem() : head(nullptr), scheduleHead(nullptr), seatHead(nullptr) {}
+
+  
+    ~TrainManagementSystem() {
+  
+        deleteLinkedList(head);
+        deleteLinkedList(scheduleHead);
+        deleteLinkedList(seatHead);
+    }
+
+ 
+    void addTrain(int number, const string& name, const string& time, const string& dest) {
+        TrainNode* newNode = new TrainNode(number, name, time, dest);
+        if (head == nullptr) {
+            head = newNode;
+        }
+        else {
+            TrainNode* current = head;
+            while (current->next != nullptr) {
+                current = current->next;
+            }
+            current->next = newNode;
+        }
+    }
+
+  
+    void addTrainSchedule(const string& origin, const string& destination, const string& departureTime) {
+        TrainScheduleNode* newNode = new TrainScheduleNode(origin, destination, departureTime);
+        if (scheduleHead == nullptr) {
+            scheduleHead = newNode;
+        }
+        else {
+            TrainScheduleNode* current = scheduleHead;
+            while (current->next != nullptr) {
+                current = current->next;
+            }
+            current->next = newNode;
+        }
+    }
+
+   
+    void checkSeatAvailability(int trainNumber) {
+        SeatReservationNode* current = seatHead;
+        while (current != nullptr && current->trainNumber != trainNumber) {
+            current = current->next;
+        }
+        if (current == nullptr) {
+            cout << "Train with number " << trainNumber << " not found." << endl;
+            return;
+        }
+        cout << "Available seats for Train Number " << trainNumber << ":" << endl;
+        cout << "First Class: " << current->availableSeatsFirstClass << endl;
+        cout << "Second Class: " << current->availableSeatsSecondClass << endl;
+    }
+
+ 
+    void bookSeats(int trainNumber, int classType, int seatsToBook) {
+        SeatReservationNode* current = seatHead;
+        while (current != nullptr && current->trainNumber != trainNumber) {
+            current = current->next;
+        }
+        if (current == nullptr) {
+            cout << "Train with number " << trainNumber << " not found." << endl;
+            return;
+        }
+        if (classType == 1) {
+            if (current->availableSeatsFirstClass >= seatsToBook) {
+                current->availableSeatsFirstClass -= seatsToBook;
+                cout << "Booking successful for " << seatsToBook << " first class seats on Train Number " << trainNumber << "." << endl;
+            }
+            else {
+                cout << "Insufficient first class seats available on Train Number " << trainNumber << "." << endl;
+            }
+        }
+        else if (classType == 2) {
+            if (current->availableSeatsSecondClass >= seatsToBook) {
+                current->availableSeatsSecondClass -= seatsToBook;
+                cout << "Booking successful for " << seatsToBook << " second class seats on Train Number " << trainNumber << "." << endl;
+            }
+            else {
+                cout << "Insufficient second class seats available on Train Number " << trainNumber << "." << endl;
+            }
+        }
+        else {
+            cout << "Invalid class type." << endl;
+        }
+    }
+
+   
+    void chooseDestination() {
+        TrainScheduleNode* current = scheduleHead;
+        int option = 1;
+        cout << "Choose Destination:" << endl;
+        while (current != nullptr) {
+            cout << option++ << ". " << current->origin << " to " << current->destination << endl;
+            current = current->next;
+        }
+    }
+
+    
+    void makePayment() {
+        cout << "Online payment accepted. Please proceed to make payment online." << endl;
+        cout << "For assistance, call 9356839325." << endl;
+    }
+
+
+    void displayTrainNumbers() {
+        TrainNode* current = head;
+        cout << "Available Train Numbers:" << endl;
+        while (current != nullptr) {
+            cout << current->trainNumber << endl;
+            current = current->next;
+        }
+    }
+
+private:
+    
+    template<typename T>
+    void deleteLinkedList(T*& head) {
+        while (head != nullptr) {
+            T* temp = head;
+            head = head->next;
+            delete temp;
+        }
+    }
+};
+
+int main() {
+    TrainManagementSystem tms;
+
+    
+    tms.addTrain(123, "Express", "08:00", "Daund");
+    tms.addTrain(456, "Local", "09:30", "Pune");
+    tms.addTrain(789, "Superfast", "10:45", "Delhi");
+
+    tms.addTrainSchedule("Daundk", "Pune", "08:00");
+    tms.addTrainSchedule("Pune", "Delhi", "09:30");
+
+  
+    cout << "Welcome to RN Train Reservation" << endl;
+
+    int choice;
+
+
+    cout << "1. Check Seat Availability" << endl;
+    cout << "2. Book Seats" << endl;
+    cout << "3. Choose Destination" << endl;
+    cout << "4. First Class Booking" << endl;
+    cout << "5. Second Class Booking" << endl;
+    cout << "6. Make Online Payment" << endl;
+    cout << "Enter your choice: ";
+    cin >> choice;
+
+    switch (choice) {
+    case 1: {
+        int trainNumber;
+        cout << "Enter train number to check seat availability: ";
+        cin >> trainNumber;
+        tms.checkSeatAvailability(trainNumber);
+        break;
+    }
+    case 2: {
+        int trainNumber, classType, seatsToBook;
+        cout << "Enter train number to book seats: ";
+        cin >> trainNumber;
+        cout << "Enter class type (1 for First Class, 2 for Second Class): ";
+        cin >> classType;
+        cout << "Enter number of seats to book: ";
+        cin >> seatsToBook;
+        tms.bookSeats(trainNumber, classType, seatsToBook);
+        break;
+    }
+    case 3: {
+        tms.chooseDestination();
+        break;
+    }
+    case 4: {
+        int trainNumber, seatsToBook;
+        cout << "Enter train number for first class booking: ";
+        cin >> trainNumber;
+        cout << "Enter number of first class seats to book: ";
+        cin >> seatsToBook;
+        tms.bookSeats(trainNumber, 1, seatsToBook);
+        break;
+    }
+    case 5: {
+        int trainNumber, seatsToBook;
+        cout << "Enter train number for second class booking: ";
+        cin >> trainNumber;
+        cout << "Enter number of second class seats to book: ";
+        cin >> seatsToBook;
+        tms.bookSeats(trainNumber, 2, seatsToBook);
+        break;
+    }
+    case 6: {
+        tms.makePayment();
+        break;
+    }
+    default:
+        cout << "Invalid choice." << endl;
+    }
+
+    cout << "Thank you." << endl;
+
+    return 0;
+}
